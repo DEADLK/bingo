@@ -1,10 +1,108 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8">
-    <title>Bingo</title>
-  </head>
-  <body>
-    <h1>Hello, world!</h1>
-  </body>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Community Retro Bingo</title>
+  <style>
+    body {
+      background-color: #121212;
+      color: white;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(5, 120px);
+      grid-template-rows: repeat(5, 120px);
+      gap: 10px;
+    }
+
+    .cell {
+      background-color: black;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      border: 2px solid white;
+      padding: 10px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .selected {
+      background-color: red;
+    }
+
+    .bingo {
+      margin-top: 30px;
+      font-size: 24px;
+      color: yellow;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Community Retro Bingo</h1>
+  <div class="grid" id="grid"></div>
+  <div class="bingo" id="bingoMessage">🎉 Bingo! 🎉</div>
+
+  <script>
+    const phrases = [
+      "Think outside the box", "Push the envelope", "Circle back later",
+      "Let's touch base soon", "Move the needle", "Low-hanging fruit",
+      "Quick win for now", "This is high priority", "Bandwidth is limited",
+      "Let's take it offline", "Get ducks in a row", "Hard stop at noon",
+      "Boil the ocean", "Ping me on Slack", "Let's sync up soon",
+      "Close the loop", "Run it up the flagpole", "Drill down deeper",
+      "Align on strategy", "Table this for later", "Work smarter not harder",
+      "Leverage best practices", "Double-click on that", "Raise the bar",
+      "Win-win situation"
+    ];
+
+    const grid = document.getElementById("grid");
+    const bingoMessage = document.getElementById("bingoMessage");
+
+    const gridSize = 5;
+    const selected = Array.from({ length: gridSize }, () => Array(gridSize).fill(false));
+
+    function getRandomPhrase() {
+      let phrase;
+      do {
+        phrase = phrases[Math.floor(Math.random() * phrases.length)];
+      } while (phrase.split(" ").length < 2 || phrase.split(" ").length > 7);
+      return phrase;
+    }
+
+    function checkBingo() {
+      for (let i = 0; i < gridSize; i++) {
+        if (selected[i].every(v => v)) return true; 
+        if (selected.every(row => row[i])) return true;
+      }
+      return false;
+    }
+
+    for (let row = 0; row < gridSize; row++) {
+      for (let col = 0; col < gridSize; col++) {
+        const cell = document.createElement("div");
+        cell.className = "cell";
+        cell.textContent = getRandomPhrase();
+        cell.addEventListener("click", () => {
+          if (!selected[row][col]) {
+            selected[row][col] = true;
+            cell.classList.add("selected");
+            if (checkBingo()) {
+              bingoMessage.style.display = "block";
+            }
+          }
+        });
+        grid.appendChild(cell);
+      }
+    }
+  </script>
+</body>
 </html>
