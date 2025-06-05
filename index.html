@@ -32,6 +32,7 @@
       padding: 10px;
       cursor: pointer;
       transition: background-color 0.3s;
+      font-size: 12px;
     }
 
     .selected {
@@ -44,65 +45,101 @@
       color: yellow;
       display: none;
     }
+
+    .reset-btn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #333;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: background 0.3s;
+    }
+
+    .reset-btn:hover {
+      background-color: #555;
+    }
   </style>
 </head>
 <body>
   <h1>Community Retro Bingo</h1>
   <div class="grid" id="grid"></div>
+  <button class="reset-btn" onclick="init()">Reset</button>
   <div class="bingo" id="bingoMessage">🎉 Bingo! 🎉</div>
 
   <script>
-    const phrases = [
-      "Think outside the box", "Push the envelope", "Circle back later",
-      "Let's touch base soon", "Move the needle", "Low-hanging fruit",
-      "Quick win for now", "This is high priority", "Bandwidth is limited",
-      "Let's take it offline", "Get ducks in a row", "Hard stop at noon",
-      "Boil the ocean", "Ping me on Slack", "Let's sync up soon",
-      "Close the loop", "Run it up the flagpole", "Drill down deeper",
-      "Align on strategy", "Table this for later", "Work smarter not harder",
-      "Leverage best practices", "Double-click on that", "Raise the bar",
-      "Win-win situation"
+    const originalPhrases = [
+      "Great Teamwork!", "Bitbucket was down again", "Trucker team", "e2e test was done late", "clients merge 5 mins before codefreeze",
+      "forgot to add analytics", "X is back from vacation", "X is on vacation", "Jira status was not updated", "Figma was outdated",
+      "Are we responsible for that?", "Communication between client and server", "Quickly fixed X in prod", "Localization issue", "Burnout",
+      "No tech tasks", "Andrei cycle-time talk", "New team member", "Teambuilding", "Secret stand-up",
+      "Edmundas is not happy", "Dima money talk", "Slawomir carried away", "Andrius background", "The next sprint will be calm"
     ];
 
     const grid = document.getElementById("grid");
     const bingoMessage = document.getElementById("bingoMessage");
-
     const gridSize = 5;
-    const selected = Array.from({ length: gridSize }, () => Array(gridSize).fill(false));
+    let selected = [];
+    let cells = [];
 
-    function getRandomPhrase() {
-      let phrase;
-      do {
-        phrase = phrases[Math.floor(Math.random() * phrases.length)];
-      } while (phrase.split(" ").length < 2 || phrase.split(" ").length > 7);
-      return phrase;
+    function shuffle(array) {
+      return array
+        .map(value => ({ value, sort: Math.random() }))
+        .sort((a, b) => a.sort - b.sort)
+        .map(({ value }) => value);
     }
 
     function checkBingo() {
       for (let i = 0; i < gridSize; i++) {
-        if (selected[i].every(v => v)) return true; 
-        if (selected.every(row => row[i])) return true;
+        if (selected[i].every(v => v)) return true; // горизонталь
+        if (selected.every(row => row[i])) return true; // вертикаль
       }
+
+      // диагонали
+      if (selected.every((row, i) => row[i])) return true;
+      if (selected.every((row, i) => row[gridSize - 1 - i])) return true;
+
       return false;
     }
 
-    for (let row = 0; row < gridSize; row++) {
-      for (let col = 0; col < gridSize; col++) {
-        const cell = document.createElement("div");
-        cell.className = "cell";
-        cell.textContent = getRandomPhrase();
-        cell.addEventListener("click", () => {
-          if (!selected[row][col]) {
-            selected[row][col] = true;
-            cell.classList.add("selected");
-            if (checkBingo()) {
-              bingoMessage.style.display = "block";
+    function init() {
+      // Очистка
+      grid.innerHTML = "";
+      bingoMessage.style.display = "none";
+      selected = Array.from({ length: gridSize }, () => Array(gridSize).fill(false));
+      cells = [];
+
+      const phrases = shuffle([...originalPhrases]);
+      let phraseIndex = 0;
+
+      for (let row = 0; row < gridSize; row++) {
+        cells[row] = [];
+        for (let col = 0; col < gridSize; col++) {
+          const cell = document.createElement("div");
+          cell.className = "cell";
+          const phrase = phrases[phraseIndex++];
+          cell.textContent = phrase;
+
+          cell.addEventListener("click", () => {
+            if (!selected[row][col]) {
+              selected[row][col] = true;
+              cell.classList.add("selected");
+              if (checkBingo()) {
+                bingoMessage.style.display = "block";
+              }
             }
-          }
-        });
-        grid.appendChild(cell);
+          });
+
+          grid.appendChild(cell);
+          cells[row][col] = cell;
+        }
       }
     }
+
+    // Инициализация при загрузке
+    window.onload = init;
   </script>
 </body>
 </html>
